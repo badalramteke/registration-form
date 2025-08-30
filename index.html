@@ -12,6 +12,11 @@
       content="GDG Kits Ramtek - Shark Tank themed hackathon registration"
     />
     <style>
+      /* prevent horizontal scrollbar from decorative artwork */
+      html,
+      body {
+        overflow-x: hidden;
+      }
       /* small page-level CSS for decorative animations (kept minimal) */
       .wave {
         position: absolute;
@@ -74,13 +79,13 @@
           background: linear-gradient(
             to bottom,
             #0f172a 0%,
-            #075985 50%, 
+            #075985 50%,
             #0891b2 100%
           ) !important;
           background-attachment: fixed !important;
           background-size: 100% 100% !important;
         }
-        
+
         /* Prevent the page from jumping when keyboard opens */
         html {
           height: -webkit-fill-available !important;
@@ -103,7 +108,7 @@
     </style>
   </head>
   <body
-    class="min-h-screen bg-gradient-to-b from-sky-900 via-sky-800 to-cyan-900 flex items-center justify-center p-6 relative text-black pb-24 overflow-hidden md:overflow-normal"
+    class="min-h-screen bg-gradient-to-b from-sky-900 via-sky-800 to-cyan-900 flex items-center justify-center p-6 relative text-black pb-24 overflow-vertical md:overflow-vertical"
   >
     <!-- decorative waves -->
     <svg
@@ -291,6 +296,104 @@
                 class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="Elevator pitch (max 140 chars)"
               />
+            </div>
+
+            <!-- Team type selection -->
+            <div class="pt-2">
+              <label class="block text-sm font-medium text-sky-100/90 mb-1"
+                >Team Type</label
+              >
+              <div class="flex flex-wrap gap-4 items-center">
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="teamType"
+                    value="Individual"
+                    id="teamTypeIndividual"
+                    checked
+                    class="mr-2"
+                  />
+                  Individual
+                </label>
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="teamType"
+                    value="Double"
+                    id="teamTypeDouble"
+                    class="mr-2"
+                  />
+                  Double (2)
+                </label>
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="teamType"
+                    value="Group"
+                    id="teamTypeGroup"
+                    class="mr-2"
+                  />
+                  Group (3-4)
+                </label>
+              </div>
+            </div>
+
+            <!-- Group members (hidden unless selected) -->
+            <div id="groupMembers" class="space-y-3 hidden pt-2">
+              <div class="text-xs text-sky-100/80 -mb-1">
+                Add your team member(s) below:
+              </div>
+              <!-- Member 2 -->
+              <div id="member2" class="p-2 rounded-lg bg-black/10 hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    name="member2Name"
+                    id="member2Name"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 2 Name"
+                  />
+                  <input
+                    name="member2Roll"
+                    id="member2Roll"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 2 Roll No"
+                  />
+                </div>
+              </div>
+              <!-- Member 3 -->
+              <div id="member3" class="p-2 rounded-lg bg-black/10 hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    name="member3Name"
+                    id="member3Name"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 3 Name"
+                  />
+                  <input
+                    name="member3Roll"
+                    id="member3Roll"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 3 Roll No"
+                  />
+                </div>
+              </div>
+              <!-- Member 4 -->
+              <div id="member4" class="p-2 rounded-lg bg-black/10 hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    name="member4Name"
+                    id="member4Name"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 4 Name"
+                  />
+                  <input
+                    name="member4Roll"
+                    id="member4Roll"
+                    class="block w-full rounded-md bg-white/10 border-white/10 px-3 py-1.5 text-black placeholder-gray-300 text-sm"
+                    placeholder="Member 4 Roll No"
+                  />
+                </div>
+              </div>
             </div>
 
             <!-- QR upload for payment proof -->

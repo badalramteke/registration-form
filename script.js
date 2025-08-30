@@ -43,6 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyBtn = document.getElementById("copyQrBtn");
   const payQrLink = document.getElementById("payQrLink");
 
+  const teamTypeRadios = document.querySelectorAll('input[name="teamType"]');
+
   function setStatus(text, isError = false) {
     if (!statusEl) return;
     statusEl.textContent = text;
@@ -201,6 +203,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Show/hide group members fields based on team type
+  function updateGroupFields() {
+    const selectedType =
+      document.querySelector('input[name="teamType"]:checked')?.value ||
+      "Individual";
+    const groupMembersDiv = document.getElementById("groupMembers");
+    const member2Div = document.getElementById("member2");
+    const member3Div = document.getElementById("member3");
+    const member4Div = document.getElementById("member4");
+
+    if (!groupMembersDiv || !member2Div || !member3Div || !member4Div) return;
+
+    const show = (el) => el.classList.remove("hidden");
+    const hide = (el) => el.classList.add("hidden");
+
+    if (selectedType === "Individual") {
+      hide(groupMembersDiv);
+    } else {
+      show(groupMembersDiv);
+      if (selectedType === "Double") {
+        show(member2Div);
+        hide(member3Div);
+        hide(member4Div);
+      } else if (selectedType === "Group") {
+        show(member2Div);
+        show(member3Div);
+        show(member4Div);
+      }
+    }
+  }
+
+  teamTypeRadios.forEach((r) =>
+    r.addEventListener("change", updateGroupFields)
+  );
+  updateGroupFields();
+
   // Guard: ensure form exists
   if (!form) {
     console.warn('Registration form not found (id="regForm").');
@@ -220,9 +258,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const fd = new FormData(form);
+      const teamType = fd.get("teamType") || "Individual";
+
+      // Collect base fields
+      let primaryName = (fd.get("name") || "").toString().trim();
+      let primaryRoll = (fd.get("roll") || "").toString().trim();
+
+      // Collect member fields (may be empty)
+      const member2Name = (fd.get("member2Name") || "").toString().trim();
+      const member2Roll = (fd.get("member2Roll") || "").toString().trim();
+      const member3Name = (fd.get("member3Name") || "").toString().trim();
+      const member3Roll = (fd.get("member3Roll") || "").toString().trim();
+      const member4Name = (fd.get("member4Name") || "").toString().trim();
+      const member4Roll = (fd.get("member4Roll") || "").toString().trim();
+
+      // Validate members based on teamType
+      if (teamType === "Double") {
+        if (!member2Name || !member2Roll) {
+          setStatus("Please fill in details for Member 2.", true);
+          return;
+        }
+      } else if (teamType === "Group") {
+        if (!member2Name || !member2Roll) {
+          setStatus("Please fill in details for Member 2.", true);
+          return;
+        }
+        if (!member3Name || !member3Roll) {
+          setStatus(
+            "For a group, please add at least one more member (Member 3).",
+            true
+          );
+          return;
+        }
+        // member4 is optional
+      }
+
+      // Build combined name/roll for Double/Group so Sheet 'name' and 'roll' columns contain all members
+      let combinedNames = primaryName;
+      let combinedRolls = primaryRoll;
+      // Use newline so names/rolls stack vertically in a single Google Sheets cell
+      const sep = "\n";
+      if (teamType === "Double" || teamType === "Group") {
+        if (member2Name)
+          combinedNames += (combinedNames ? sep : "") + member2Name;
+        if (member2Roll)
+          combinedRolls += (combinedRolls ? sep : "") + member2Roll;
+      }
+      if (teamType === "Group") {
+        if (member3Name)
+          combinedNames += (combinedNames ? sep : "") + member3Name;
+        if (member3Roll)
+          combinedRolls += (combinedRolls ? sep : "") + member3Roll;
+        if (member4Name)
+          combinedNames += (combinedNames ? sep : "") + member4Name;
+        if (member4Roll)
+          combinedRolls += (combinedRolls ? sep : "") + member4Roll;
+      }
+
+      // Build payload — send aggregated name/roll only (avoid extra duplicate columns in Sheet)
       const payload = {
-        name: fd.get("name") || "",
-        roll: fd.get("roll") || "",
+        teamType,
+        name: combinedNames || primaryName || "",
+        roll: combinedRolls || primaryRoll || "",
         email: fd.get("email") || "",
         branch: fd.get("branch") || "",
         phone: fd.get("phone") || "",
@@ -232,9 +329,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const qrFile =
         qrInput && qrInput.files && qrInput.files[0] ? qrInput.files[0] : null;
 
-      // Basic validation
+      // Basic validation: required fields
       if (!payload.name || !payload.roll || !payload.email || !payload.branch) {
         setStatus("Please fill required fields.", true);
+        return;
+      }
+
+      // Email regex (simple, covers common cases)
+      const email = (payload.email || "").toString().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setStatus("Please enter a valid email address.", true);
+        return;
+      }
+
+      // Phone: allow +, spaces, dashes. Validate by digit count (7-15 digits common range)
+      const phoneRaw = (payload.phone || "").toString().trim();
+      const phoneDigits = phoneRaw.replace(/\D/g, "");
+      if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+        setStatus("Please enter a valid phone number (7-15 digits).", true);
         return;
       }
       if (qrFile && !qrFile.type.startsWith("image/")) {
@@ -250,11 +363,26 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus("Uploaded QR & saved.");
       form.reset();
       if (qrPreview) qrPreview.innerHTML = "";
+      updateGroupFields();
       alert("Registration successful.");
     } catch (err) {
       console.error(err);
-      setStatus("Error: " + (err.message || String(err)), true);
-      alert("Submission failed: " + (err.message || String(err)));
+      const msg = (err && (err.message || String(err))) || "Submission failed";
+      // Show server error inline
+      setStatus(msg, true);
+
+      // If the server indicates a duplicate, focus the relevant input
+      const low = msg.toString().toLowerCase();
+      if (low.includes("email")) {
+        const emailInput = document.querySelector('input[name="email"]');
+        if (emailInput) emailInput.focus();
+      } else if (low.includes("phone") || low.includes("mobile")) {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        if (phoneInput) phoneInput.focus();
+      } else {
+        // Fallback: show an alert for unexpected errors
+        alert("Submission failed: " + msg);
+      }
     }
   });
 });
