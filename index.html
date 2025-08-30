@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GDG Kits Ramtek — Hackathon Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./script.js" type="module"></script>
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <meta
+      name="description"
+      content="GDG Kits Ramtek - Shark Tank themed hackathon registration"
+    />
+    <style>
+      /* small page-level CSS for decorative animations (kept minimal) */
+      .wave {
+        position: absolute;
+        left: 0;
+        width: 200%;
+        height: 30vh;
+        bottom: 0;
+        transform: translate3d(0, 0, 0);
+        /* faster wave */
+        animation: wave 4.5s linear infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes wave {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      .shark {
+        position: absolute;
+        right: -10%;
+        top: 18%;
+        width: 120px;
+        /* faster swim */
+        animation: swim 3.2s linear infinite;
+      }
+
+      @keyframes swim {
+        0% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateX(-30vw) translateY(6vh) rotate(6deg);
+        }
+        100% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
+      }
+
+      /* Make QR codes render sharply even when scaled */
+      .qr-crisp {
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: pixelated;
+      }
+
+      /* Mobile viewport fixes for keyboard jumping */
+      @media screen and (max-width: 768px) {
+        body {
+          position: relative !important;
+          min-height: -webkit-fill-available !important;
+          min-height: 100vh !important;
+          width: 100% !important;
+          overflow-x: hidden !important;
+          /* Ensure background gradient covers full viewport */
+          background: linear-gradient(
+            to bottom,
+            #0f172a 0%,
+            #075985 50%, 
+            #0891b2 100%
+          ) !important;
+          background-attachment: fixed !important;
+          background-size: 100% 100% !important;
+        }
+        
+        /* Prevent the page from jumping when keyboard opens */
+        html {
+          height: -webkit-fill-available !important;
+          height: 100% !important;
+        }
+
+        main {
+          position: relative !important;
+          z-index: 10 !important;
+        }
+
+        /* Prevent input focus from causing layout shifts */
+        input:focus,
+        select:focus,
+        textarea:focus {
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-b from-sky-900 via-sky-800 to-cyan-900 flex items-center justify-center p-6 relative text-black pb-24 overflow-hidden md:overflow-normal"
+  >
+    <!-- decorative waves -->
+    <svg
+      class="wave"
+      viewBox="0 0 1200 200"
+      preserveAspectRatio="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0,80 C150,200 350,0 600,80 C850,160 1050,40 1200,80 L1200,200 L0,200 Z"
+        fill="#0ea5e9"
+      ></path>
+    </svg>
+
+    <!-- shark SVG (simple) -->
+    <svg
+      class="shark"
+      viewBox="0 0 100 50"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <g fill="#0f172a">
+        <path
+          d="M5 25 C20 10 40 10 60 16 C70 10 85 6 95 12 C85 20 75 24 60 26 C40 30 20 35 5 25 Z"
+        />
+        <path d="M30 22 L10 18 L12 22 L10 26 L30 22" fill="#38bdf8" />
+      </g>
+    </svg>
+
+    <main class="max-w-4xl w-full z-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <section
+          class="p-8 bg-white/6 backdrop-blur rounded-2xl shadow-xl border border-white/10"
+        >
+          <h1 class="text-3xl font-extrabold mb-2">
+            GDG Kits Ramtek — Hackathon Registration
+          </h1>
+
+          <ul class="space-y-2 text-sky-100/80 text-sm">
+            <li><strong>Event:</strong> GDG Kits Ramtek Hackathon</li>
+
+            <li>
+              <strong>What we need:</strong> Basic info → Roll number → Email →
+              Branch
+            </li>
+          </ul>
+
+          <!-- Payment QR code for scanning to pay -->
+          <div
+            id="payQrContainer"
+            class="mt-6 p-4 bg-white/4 rounded-lg border border-white/8"
+          >
+            <h3 class="text-sm font-semibold mb-2">Pay registration fee</h3>
+            <p class="text-sm text-sky-100/80 mb-2">
+              Scan the QR below to pay. After payment, upload the payment QR or
+              screenshot in the form.
+            </p>
+            <div class="flex items-start gap-4">
+              <div class="bg-white rounded-lg p-2 shadow ring-1 ring-black/5">
+                <img
+                  id="payQr"
+                  src="./qr_image.jpg"
+                  alt="Payment QR"
+                  class="w-40 h-auto qr-crisp block"
+                />
+              </div>
+              <div class="flex flex-col gap-2">
+                <button
+                  id="viewQrFull"
+                  type="button"
+                  class="px-3 py-1 rounded bg-cyan-500 text-sky-900 font-semibold shadow"
+                >
+                  View full size
+                </button>
+                <a
+                  id="openQrNewTabInline"
+                  href="./qr_image.jpg"
+                  target="_blank"
+                  rel="noopener"
+                  class="px-3 py-1 rounded bg-white/10 text-sm"
+                  >Open in new tab</a
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="p-6 bg-white/5 rounded-2xl shadow-md border border-white/8"
+        >
+          <form id="regForm" class="space-y-4" autocomplete="off">
+            <div>
+              <label class="block text-sm font-medium text-sky-100/90"
+                >Full Name</label
+              >
+              <input
+                name="name"
+                id="name"
+                required
+                class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="Your full name"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-sky-100/90"
+                  >Roll Number</label
+                >
+                <input
+                  name="roll"
+                  id="roll"
+                  required
+                  class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  placeholder="eg. 123456"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-sky-100/90"
+                  >Branch</label
+                >
+                <select
+                  name="branch"
+                  id="branch"
+                  aria-label="Branch"
+                  required
+                  class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="" disabled selected>Select your branch</option>
+                  <option value="Information Technology">
+                    Information Technology
+                  </option>
+                  <option value="Computer Technology">
+                    Computer Technology
+                  </option>
+                  <option value="Electronics and Communication">
+                    Electronics and Communication
+                  </option>
+                  <option value="Mechanical Engineering">
+                    Mechanical Engineering
+                  </option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="Electrical Engineering">
+                    Electrical Engineering
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-sky-100/90"
+                >Email</label
+              >
+              <input
+                name="email"
+                id="email"
+                type="email"
+                required
+                class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-sky-100/90"
+                >Phone (optional)</label
+              >
+              <input
+                name="phone"
+                id="phone"
+                type="tel"
+                class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="Mobile number"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-sky-100/90"
+                >One-line pitch (why your idea?)</label
+              >
+              <input
+                name="pitch"
+                id="pitch"
+                maxlength="140"
+                class="mt-1 block w-full rounded-lg bg-white/6 border border-white/10 px-4 py-2 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="Elevator pitch (max 140 chars)"
+              />
+            </div>
+
+            <!-- QR upload for payment proof -->
+            <div>
+              <label class="block text-sm font-medium text-sky-100/90"
+                >Payment QR (upload)</label
+              >
+              <div class="mt-1 flex items-center gap-3">
+                <input
+                  id="qrfile"
+                  name="qrfile"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  aria-label="Payment QR file"
+                  title="Upload payment QR"
+                  class="block text-sm text-sky-900"
+                />
+                <button
+                  type="button"
+                  id="clearQr"
+                  class="px-3 py-1 bg-white/10 text-sm rounded"
+                >
+                  Clear
+                </button>
+              </div>
+              <div id="qrPreview" class="mt-2 text-sm text-sky-200/80"></div>
+            </div>
+
+            <div
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0"
+            >
+              <button
+                id="submitBtn"
+                type="submit"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-sky-900 font-semibold px-5 py-2 rounded-lg shadow-lg transition-transform cursor-pointer"
+              >
+                Register
+              </button>
+              <div
+                id="status"
+                class="text-sm text-sky-200/80 mt-1 sm:mt-0"
+              ></div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <!-- Full-size QR Modal -->
+    <div
+      id="qrModal"
+      class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-xl p-3 max-w-4xl max-h-[85vh] overflow-auto shadow-xl"
+      >
+        <img
+          id="qrModalImg"
+          src="./qr_image.jpg"
+          alt="Payment QR full"
+          class="qr-crisp max-w-full h-auto block"
+        />
+        <div class="text-right mt-3 space-x-2">
+          <a
+            id="openQrNewTab"
+            href="./qr_image.jpg"
+            target="_blank"
+            rel="noopener"
+            class="px-3 py-1 rounded bg-cyan-500 text-sky-900 font-semibold shadow"
+            >Open in new tab</a
+          >
+          <button
+            id="closeQr"
+            type="button"
+            class="px-3 py-1 rounded bg-gray-200"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
